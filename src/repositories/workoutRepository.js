@@ -10,13 +10,19 @@ export async function getWorkout(id) {
   const workout = await db.workouts.get(id);
   if (!workout) return null;
 
-  const exercises = await db.exercises.where('workoutId').equals(id).toArray();
-  exercises.sort((a, b) => (a.order || 0) - (b.order || 0));
+  let exercises = await db.exercises.where('workoutId').equals(id).toArray();
+  if (exercises && exercises.length > 0) {
+    exercises.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  for (const ex of exercises) {
-    const sets = await db.sets.where('exerciseId').equals(ex.id).toArray();
-    sets.sort((a, b) => (a.setNumber || 0) - (b.setNumber || 0));
-    ex.sets = sets;
+    for (const ex of exercises) {
+      const sets = await db.sets.where('exerciseId').equals(ex.id).toArray();
+      sets.sort((a, b) => (a.setNumber || 0) - (b.setNumber || 0));
+      ex.sets = sets;
+    }
+  } else if (Array.isArray(workout.exercises) && workout.exercises.length > 0) {
+    exercises = workout.exercises;
+  } else {
+    exercises = [];
   }
 
   return {

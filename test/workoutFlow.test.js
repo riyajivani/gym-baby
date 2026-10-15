@@ -24,6 +24,12 @@ import {
   validateBackup,
   importBackup
 } from '../src/repositories/backupRepository.js';
+import {
+  formatShortDate,
+  formatLongDate,
+  formatTime,
+  formatDuration
+} from '../src/utils/formatters.js';
 
 async function runTests() {
   console.log('--- Starting Yeshu Gym Step 3 Test Suite ---');
@@ -185,7 +191,32 @@ async function runTests() {
   assert.strictEqual(restoredTemplates.length, backup.templates.length, 'Restored templates must match exported count');
   console.log('  ✓ Verified: Backup restore preserves templates and all workout history');
 
-  console.log('\n=== ALL 8 TEST SUITES PASSED CLEANLY! ===\n');
+  // Test 9: History Tracked Data & Breakdown Verification
+  console.log('Test 9: Verifying history workout details, exercises, and tracked performance data...');
+  const latestHistory = await getWorkoutHistory();
+  assert.ok(latestHistory.length > 0, 'History should have at least 1 workout');
+  const histItem = latestHistory[0];
+  assert.ok(histItem.exercises && histItem.exercises.length > 0, 'Workout in history must have exercises');
+
+  let computedVol = 0;
+  let completedSets = 0;
+  histItem.exercises.forEach(ex => {
+    (ex.sets || []).forEach(s => {
+      if (s.completed) {
+        completedSets++;
+        computedVol += (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0);
+      }
+    });
+  });
+
+  assert.ok(completedSets > 0, 'Workout must have completed sets');
+  assert.ok(computedVol > 0, 'Workout must have positive volume');
+  assert.strictEqual(formatDuration(48), '48m');
+  assert.strictEqual(formatDuration(90), '1h 30m');
+  assert.ok(typeof formatTime(Date.now()) === 'string');
+  console.log(`  ✓ Verified: History item contains ${histItem.exercises.length} exercise(s), ${completedSets} completed sets, ${computedVol} kg total volume`);
+
+  console.log('\n=== ALL 9 TEST SUITES PASSED CLEANLY! ===\n');
 }
 
 runTests().catch(err => {
