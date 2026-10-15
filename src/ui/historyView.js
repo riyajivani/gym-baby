@@ -30,14 +30,22 @@ export async function renderHistoryScreen() {
   if (!appState.history || appState.history.length === 0) {
     container.innerHTML = `
       <div class="card text-center" style="padding: 32px 20px;">
-        <div style="font-size: 2.2rem; margin-bottom: 10px;">📋o</div>
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--primary-soft); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; color: var(--primary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
         <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 6px;">No Workouts in History</h3>
         <p class="text-muted" style="font-size: 0.82rem; margin-bottom: 16px; max-width: 280px; margin-left: auto; margin-right: auto;">
           Complete a workout session or import past gym logs from Settings to see your tracked exercises and sets here.
         </p>
         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
           <button class="btn btn-primary btn-sm" id="btnHistEmptyStart">+ Start Workout</button>
-          <button class="btn btn-outline-subtle btn-sm" id="btnHistEmptySettings">⚙ Import Past Logs</button>
+          <button class="btn btn-outline-subtle btn-sm" id="btnHistEmptySettings">Import Past Logs</button>
         </div>
       </div>
     `;
@@ -165,10 +173,10 @@ export async function renderHistoryScreen() {
             </div>
 
             <div class="hist-ex-meta-row">
-              ${targetDesc ? `<span class="hist-meta-pill">🎯 Target: <strong>${targetDesc}</strong></span>` : ''}
-              ${ex.rir !== null && ex.rir !== undefined ? `<span class="hist-meta-pill" style="color:var(--primary);">⚡ <strong>RIR ${ex.rir}</strong></span>` : ''}
-              ${exVol > 0 ? `<span class="hist-meta-pill">⚡ <strong>${exVol.toLocaleString()} kg</strong> vol</span>` : ''}
-              ${bestSet ? `<span class="hist-meta-pill">🏆 Top: <strong>${bestSet.w} kg × ${bestSet.r}</strong></span>` : ''}
+              ${targetDesc ? `<span class="hist-meta-pill">Target: <strong>${targetDesc}</strong></span>` : ''}
+              ${ex.rir !== null && ex.rir !== undefined ? `<span class="hist-meta-pill" style="color:var(--primary);"><strong>RIR ${ex.rir}</strong></span>` : ''}
+              ${exVol > 0 ? `<span class="hist-meta-pill"><strong>${exVol.toLocaleString()} kg</strong> vol</span>` : ''}
+              ${bestSet ? `<span class="hist-meta-pill">Top: <strong>${bestSet.w} kg × ${bestSet.r}</strong></span>` : ''}
             </div>
 
             <table class="hist-sets-table">
@@ -203,7 +211,10 @@ export async function renderHistoryScreen() {
         return `
           <div class="hist-cardio-box">
             <div class="hist-cardio-title">
-              <span>🏃</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #38bdf8; flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+              </svg>
               <span>Cardio: ${c.name || 'Cardio Activity'}</span>
             </div>
             <div class="hist-cardio-grid">
@@ -238,7 +249,7 @@ export async function renderHistoryScreen() {
             <h3 class="hist-title">${hist.name || 'Workout Session'}</h3>
             <div class="hist-meta-line">
               <span class="hist-date">${formatLongDate(hist.date)}</span>
-              ${durationText ? `<span class="hist-duration-badge">⏱️ ${durationText}</span>` : ''}
+              ${durationText ? `<span class="hist-duration-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg> ${durationText}</span>` : ''}
             </div>
           </div>
           <button class="hist-expand-btn" type="button" aria-label="Toggle workout details">
@@ -251,10 +262,10 @@ export async function renderHistoryScreen() {
 
         <div class="hist-chips-row">
           <span class="hist-chip">${exercises.length} Exercise${exercises.length === 1 ? '' : 's'}</span>
-          <span class="hist-chip"> ${completedSetsCount} Set${completedSetsCount === 1 ? '' : 's'}</span>
+          <span class="hist-chip">${completedSetsCount} Set${completedSetsCount === 1 ? '' : 's'}</span>
           <span class="hist-chip chip-highlight">${vol.toLocaleString()} kg</span>
           ${hist.bodyWeight ? `<span class="hist-chip">${hist.bodyWeight} kg BW</span>` : ''}
-          ${hasCardio ? `<span class="hist-chip chip-cardio"> Cardio</span>` : ''}
+          ${hasCardio ? `<span class="hist-chip chip-cardio">Cardio</span>` : ''}
         </div>
 
         <div class="hist-click-hint">

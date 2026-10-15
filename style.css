@@ -871,8 +871,8 @@ html, body {
   font-weight: 800;
   color: var(--text-main);
   padding: 0 1px;
-  -moz-appearance: textfield;
-  box-sizing: border-box;
+  /* -moz-appearance: textfield; */
+  /* box-sizing: border-box; */
 }
 
 .stepper-val-input::-webkit-outer-spin-button,
@@ -2039,6 +2039,12 @@ html, body {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-main);
+  outline: none;
+}
+
+.comp-weight-input:focus {
+  border-color: var(--primary);
+  outline: none;
 }
 
 .comp-date-input {
