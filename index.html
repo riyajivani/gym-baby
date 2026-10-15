@@ -405,25 +405,41 @@
       <section id="tab-settings" class="tab-pane">
         <div class="pane-header-mobile">
           <div>
-            <h2 class="pane-title-mobile">Settings & Tools</h2>
-            <p class="pane-sub-mobile">Preferences, data backup & gym notes parser</p>
+            <h2 class="pane-title-mobile">Settings</h2>
+            <p class="pane-sub-mobile">Preferences, data backup & utilities</p>
           </div>
         </div>
 
-        <!-- Routine & Week Preferences -->
-        <div class="card settings-card">
-          <h3 class="card-heading-mobile">Workout Routine</h3>
-          <div class="settings-row mb-2">
-            <div class="settings-label-group">
-              <span class="settings-title">Manage Routines & Exercises</span>
-              <span class="settings-desc">Customize Upper Body, Push, Pull, Leg Day, or add new routines</span>
+        <!-- 1. WORKOUT PREFERENCES -->
+        <div class="settings-section-heading">Workout Preferences</div>
+        <div class="settings-group-card">
+          <!-- Manage Routines -->
+          <div class="settings-item-row">
+            <div class="settings-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 5v14M18 5v14M4 8h4M16 8h4M4 16h4M16 16h4M8 12h8"></path>
+              </svg>
             </div>
-            <button class="btn btn-sm btn-primary" id="btnManageRoutinesSettings" style="white-space: nowrap;">Manage</button>
+            <div class="settings-info">
+              <span class="settings-title">Manage Routines</span>
+              <span class="settings-desc">Customize splits, exercises & targets</span>
+            </div>
+            <button class="btn btn-sm btn-primary" id="btnManageRoutinesSettings" style="white-space: nowrap; padding: 6px 14px;">Manage</button>
           </div>
-          <div class="settings-row">
-            <div class="settings-label-group">
+
+          <!-- Week Starts On -->
+          <div class="settings-item-row">
+            <div class="settings-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <div class="settings-info">
               <span class="settings-title">Week Starts On</span>
-              <span class="settings-desc">Determines scheduled split day calculation</span>
+              <span class="settings-desc">Determines weekly consistency tracking</span>
             </div>
             <select id="weekStartSelect" class="input-select-mobile">
               <option value="Monday">Monday</option>
@@ -437,22 +453,46 @@
           </div>
         </div>
 
-        <!-- Data Backup & Offline -->
-        <div class="card settings-card mt-3">
-          <h3 class="card-heading-mobile">Data & Backup</h3>
-          <p class="settings-desc mb-2">All data is stored locally in IndexedDB on this device.</p>
-          <div class="backup-actions-grid">
-            <button class="btn btn-outline" id="btnExportJSON">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Export JSON</span>
-            </button>
-            <button class="btn btn-outline" id="btnImportJSON">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span>Import JSON</span>
-            </button>
-            <input type="file" id="importFileInput" accept=".json" style="display:none" />
+        <!-- 2. DATA & BACKUP -->
+        <div class="settings-section-heading">Data & Backup</div>
+        <div class="settings-group-card">
+          <!-- Storage Status -->
+          <div class="settings-item-row">
+            <div class="settings-icon-box success">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+              </svg>
+            </div>
+            <div class="settings-info">
+              <span class="settings-title">Local Storage</span>
+              <span class="settings-desc">Private IndexedDB · 100% offline</span>
+            </div>
+            <span class="badge badge-success" style="font-size:0.7rem; font-weight:700;">Active</span>
           </div>
-          <div class="pwa-install-row mt-3" id="pwaInstallContainer">
+
+          <!-- Backup Actions Row -->
+          <div class="settings-item-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="settings-title" style="font-size:0.84rem;">Backup & Restore</span>
+              <span class="text-muted" style="font-size:0.72rem;">JSON format</span>
+            </div>
+            <div class="backup-actions-grid">
+              <button class="btn btn-outline btn-sm" id="btnExportJSON" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Export JSON</span>
+              </button>
+              <button class="btn btn-outline btn-sm" id="btnImportJSON" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Import JSON</span>
+              </button>
+              <input type="file" id="importFileInput" accept=".json" style="display:none" />
+            </div>
+          </div>
+
+          <!-- PWA Install Row -->
+          <div class="pwa-install-row p-2" id="pwaInstallContainer">
             <button class="btn btn-primary btn-block" id="pwaInstallBtn" style="display:none;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Install Yeshu Gym to Home Screen</span>
@@ -460,35 +500,73 @@
           </div>
         </div>
 
-        <!-- Smart Text Log Parser (Preserved Functional Feature) -->
-        <div class="card settings-card mt-3">
-          <div class="compact-card-header">
-            <div>
-              <h3 class="card-heading-mobile">Smart Text Log Parser</h3>
-              <p class="settings-desc">Import raw gym notes text</p>
+        <!-- 3. ADVANCED UTILITIES: SMART TEXT PARSER -->
+        <div class="settings-section-heading">Utilities</div>
+        <div class="settings-group-card">
+          <!-- Accordion Header -->
+          <div class="settings-item-row" id="btnToggleParserRow" style="cursor: pointer; user-select: none;">
+            <div class="settings-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
             </div>
-            <button class="btn btn-sm btn-subtle" id="btnLoadSampleText">Sample</button>
-          </div>
-          <textarea id="rawTextarea" class="mobile-textarea mt-2" rows="6" placeholder="Paste raw workout notes here..."></textarea>
-          <div class="parser-action-row mt-2">
-            <button class="btn btn-primary btn-sm" id="btnParseText">
-              <span>Parse & Import Session</span>
+            <div class="settings-info">
+              <span class="settings-title">Smart Notes Parser</span>
+              <span class="settings-desc">Import session from text notes</span>
+            </div>
+            <button class="btn btn-xs btn-subtle" id="btnToggleParser" style="font-size:0.75rem; padding:4px 8px; pointer-events: none;">
+              <span>Expand</span> ▾
             </button>
-            <button class="btn btn-subtle btn-sm" id="btnClearText">Clear</button>
-            <span class="badge badge-subtle ml-auto" id="parseStatusBadge">Ready</span>
           </div>
-          <div id="parsePreviewOutput" class="parse-preview-mobile mt-2">
-            <p class="text-muted text-xs">Live parse preview will appear here.</p>
+
+          <!-- Collapsible Parser Body -->
+          <div id="parserBodyContainer" style="display: none; padding: 12px 14px; border-top: 1px solid var(--border-subtle); background: var(--bg-subtle);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span class="text-xs text-muted">Paste your workout notes:</span>
+              <button class="btn btn-xs btn-subtle" id="btnLoadSampleText">Load Sample</button>
+            </div>
+            <textarea id="rawTextarea" class="mobile-textarea" rows="4" placeholder="e.g. Bench Press — 3×8–12&#10;Target: 40 kg&#10;• Set 1: 40 kg × 10..."></textarea>
+            <div class="parser-action-row mt-2">
+              <button class="btn btn-primary btn-sm" id="btnParseText">
+                <span>Parse & Import</span>
+              </button>
+              <button class="btn btn-subtle btn-sm" id="btnClearText">Clear</button>
+              <span class="badge badge-subtle ml-auto" id="parseStatusBadge">Ready</span>
+            </div>
+            <div id="parsePreviewOutput" class="parse-preview-mobile mt-2">
+              <p class="text-muted text-xs">Live parse preview will appear here.</p>
+            </div>
           </div>
         </div>
 
-        <!-- Clear Data Button -->
-        <div class="settings-footer mt-4 text-center">
-          <button class="btn btn-outline btn-sm" id="btnClearAllData" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4); padding: 8px 16px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            Clear All Workout Data
-          </button>
-          <p class="text-muted text-xs mt-2">Yeshu Gym v1.0 · PWA Ready</p>
+        <!-- 4. DANGER ZONE -->
+        <div class="settings-section-heading" style="color: #ef4444;">Danger Zone</div>
+        <div class="settings-danger-card">
+          <div class="settings-item-row" style="border-bottom:none;">
+            <div class="settings-icon-box danger">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </div>
+            <div class="settings-info">
+              <span class="settings-title" style="color:#ef4444;">Clear All Workout Data</span>
+              <span class="settings-desc">Erase workout history & active session</span>
+            </div>
+            <button class="btn btn-sm btn-subtle" id="btnClearAllData" style="color:#ef4444; border: 1px solid rgba(239,68,68,0.3); padding: 6px 12px; white-space: nowrap;">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="text-center mt-4 mb-4">
+          <p class="text-muted text-xs font-bold" style="letter-spacing:0.02em;">Yeshu Gym · Version 1.0</p>
+          <p class="text-muted text-xs mt-1" style="opacity:0.7;">100% Private & Offline First Workout Tracker</p>
         </div>
 
       </section>
