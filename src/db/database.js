@@ -57,23 +57,23 @@ export async function initDatabase() {
   // Ensure default templates are seeded
   await seedDefaultTemplatesIfEmpty();
 
-  // One-time automatic cleanup to wipe legacy mock/sample data
-  const CLEAN_FLAG_KEY = 'yeshu_gym_clean_data_v1';
-  let hasBeenCleaned = false;
+  // One-time automatic reset to clean routine shells (Upper Body, Push, Pull, Leg with 0 exercises)
+  const CLEAN_ROUTINES_KEY = 'yeshu_gym_clean_routines_v4';
+  let routinesCleaned = false;
   try {
     if (typeof localStorage !== 'undefined') {
-      hasBeenCleaned = localStorage.getItem(CLEAN_FLAG_KEY) === 'true';
+      routinesCleaned = localStorage.getItem(CLEAN_ROUTINES_KEY) === 'true';
     }
   } catch (e) {}
 
-  if (!hasBeenCleaned) {
-    await clearAllWorkoutData();
+  if (!routinesCleaned) {
+    await db.templates.clear();
+    await seedDefaultTemplatesIfEmpty();
     try {
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(CLEAN_FLAG_KEY, 'true');
+        localStorage.setItem(CLEAN_ROUTINES_KEY, 'true');
       }
     } catch (e) {}
-    return;
   }
 
   // Ensure default settings exist

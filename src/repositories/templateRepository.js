@@ -4,178 +4,43 @@ export const DEFAULT_TEMPLATES = [
   {
     id: 'tpl-upper-body',
     name: 'Upper Body',
-    description: '8-exercise upper body routine: chest, back, shoulders, arms & incline walking',
+    description: 'Custom Upper Body routine',
     isDefault: true,
-    exercises: [
-      {
-        id: 'tpl-ex-incline-bench',
-        name: 'Incline Bench Press',
-        order: 1,
-        targetSets: 3,
-        minReps: 6,
-        maxReps: 10,
-        targetScheme: '3×6–10',
-        targetWeight: 35,
-        targetWeightUnit: 'kg',
-        target: '35 kg',
-        category: 'Chest'
-      },
-      {
-        id: 'tpl-ex-pullups',
-        name: 'Assisted Pull-Ups',
-        order: 2,
-        targetSets: 3,
-        minReps: 8,
-        maxReps: 12,
-        targetScheme: '3×8–12',
-        targetWeight: 55,
-        targetWeightUnit: 'kg',
-        target: '55 kg assistance',
-        category: 'Back'
-      },
-      {
-        id: 'tpl-ex-cable-fly',
-        name: 'Cable Fly',
-        order: 3,
-        targetSets: 2,
-        minReps: 10,
-        maxReps: 15,
-        targetScheme: '2×10–15',
-        targetWeight: 10,
-        targetWeightUnit: 'kg',
-        target: '10 kg',
-        category: 'Chest'
-      },
-      {
-        id: 'tpl-ex-cable-row',
-        name: 'Seated Cable Row',
-        order: 4,
-        targetSets: 3,
-        minReps: 8,
-        maxReps: 12,
-        targetScheme: '3×8–12',
-        targetWeight: 13.5,
-        targetWeightUnit: 'kg',
-        target: '13.5 kg',
-        category: 'Back'
-      },
-      {
-        id: 'tpl-ex-db-shoulder-press',
-        name: 'Dumbbell Shoulder Press',
-        order: 5,
-        targetSets: 3,
-        minReps: 8,
-        maxReps: 12,
-        targetScheme: '3×8–12',
-        targetWeight: 10,
-        targetWeightUnit: 'kg',
-        target: '10 kg',
-        category: 'Shoulders'
-      },
-      {
-        id: 'tpl-ex-lat-raise',
-        name: 'Dumbbell Lateral Raise',
-        order: 6,
-        targetSets: 4,
-        minReps: 12,
-        maxReps: 20,
-        targetScheme: '4×12–20',
-        targetWeight: 2.5,
-        targetWeightUnit: 'kg',
-        target: '2.5 kg',
-        category: 'Shoulders'
-      },
-      {
-        id: 'tpl-ex-rear-delt-fly',
-        name: 'Rear Delt Fly',
-        order: 7,
-        targetSets: 3,
-        minReps: 12,
-        maxReps: 20,
-        targetScheme: '3×12–20',
-        targetWeight: 15,
-        targetWeightUnit: 'kg',
-        target: '15 kg',
-        category: 'Shoulders'
-      },
-      {
-        id: 'tpl-ex-cable-curl',
-        name: 'Cable Curl',
-        order: 8,
-        targetSets: 2,
-        minReps: 10,
-        maxReps: 15,
-        targetScheme: '2×10–15',
-        targetWeight: 20,
-        targetWeightUnit: 'kg',
-        target: '20 kg',
-        category: 'Arms'
-      }
-    ],
-    cardio: [
-      {
-        name: 'Incline Walking',
-        time: '2 min',
-        distance: '0.15 km',
-        incline: '10%',
-        speed: '4.0 km/h'
-      }
-    ],
+    exercises: [],
+    cardio: [],
     updatedAt: Date.now()
   },
   {
     id: 'tpl-push-day',
     name: 'Push Day',
-    description: '3-exercise push session: Bench Press, Incline DB Press, Machine Chest Press',
+    description: 'Custom Push Day routine (Chest, Shoulders, Triceps)',
     isDefault: false,
-    exercises: [
-      {
-        id: 'tpl-ex-bench-press',
-        name: 'Bench Press',
-        order: 1,
-        targetSets: 3,
-        minReps: 6,
-        maxReps: 10,
-        targetScheme: '3×6–10',
-        targetWeight: 40,
-        targetWeightUnit: 'kg',
-        target: '40 kg',
-        category: 'Chest'
-      },
-      {
-        id: 'tpl-ex-incline-db-press',
-        name: 'Incline Dumbbell Press',
-        order: 2,
-        targetSets: 3,
-        minReps: 8,
-        maxReps: 12,
-        targetScheme: '3×8–12',
-        targetWeight: 12.5,
-        targetWeightUnit: 'kg',
-        target: '12.5 kg',
-        category: 'Chest'
-      },
-      {
-        id: 'tpl-ex-seated-machine-chest',
-        name: 'Seated Machine Chest Press',
-        order: 3,
-        targetSets: 2,
-        minReps: 10,
-        maxReps: 15,
-        targetScheme: '2×10–15',
-        targetWeight: 35,
-        targetWeightUnit: 'kg',
-        target: '35 kg',
-        category: 'Chest'
-      }
-    ],
+    exercises: [],
+    cardio: [],
+    updatedAt: Date.now()
+  },
+  {
+    id: 'tpl-pull-day',
+    name: 'Pull Day',
+    description: 'Custom Pull Day routine (Back, Biceps, Rear Delts)',
+    isDefault: false,
+    exercises: [],
+    cardio: [],
+    updatedAt: Date.now()
+  },
+  {
+    id: 'tpl-leg-day',
+    name: 'Leg Day',
+    description: 'Custom Leg Day routine (Quads, Hamstrings, Calves, Core)',
+    isDefault: false,
+    exercises: [],
     cardio: [],
     updatedAt: Date.now()
   }
 ];
 
 /**
- * Retrieves all workout templates.
+ * Retrieves all workout templates sorted with default first.
  * @returns {Promise<Array<Object>>}
  */
 export async function getTemplates() {
@@ -194,7 +59,6 @@ export async function getTemplate(id) {
   await seedDefaultTemplatesIfEmpty();
   const template = await db.templates.get(id);
   if (template) return template;
-  // Fallback to default
   return await getDefaultTemplate();
 }
 
@@ -211,7 +75,32 @@ export async function getDefaultTemplate() {
 }
 
 /**
- * Saves or updates a template.
+ * Creates a brand new custom workout routine template.
+ * @param {string} name 
+ * @param {string} description 
+ * @returns {Promise<Object>}
+ */
+export async function createCustomTemplate(name, description = '') {
+  const cleanName = (name || 'New Routine').trim();
+  const slug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const id = `tpl-${slug}-${Date.now().toString(36)}`;
+
+  const newTpl = {
+    id: id,
+    name: cleanName,
+    description: description || `${cleanName} routine`,
+    isDefault: false,
+    exercises: [],
+    cardio: [],
+    updatedAt: Date.now()
+  };
+
+  await db.templates.put(newTpl);
+  return newTpl;
+}
+
+/**
+ * Saves or updates an entire template object.
  * @param {Object} template 
  * @returns {Promise<Object>}
  */
@@ -220,6 +109,79 @@ export async function saveTemplate(template) {
     ...template,
     updatedAt: Date.now()
   };
+  await db.templates.put(tpl);
+  return tpl;
+}
+
+/**
+ * Renames a template by ID.
+ * @param {string} id 
+ * @param {string} newName 
+ * @returns {Promise<Object|null>}
+ */
+export async function renameTemplate(id, newName) {
+  const tpl = await db.templates.get(id);
+  if (!tpl) return null;
+  tpl.name = (newName || tpl.name).trim();
+  tpl.updatedAt = Date.now();
+  await db.templates.put(tpl);
+  return tpl;
+}
+
+/**
+ * Adds an exercise to an existing template.
+ * @param {string} templateId 
+ * @param {Object} exerciseData 
+ * @returns {Promise<Object|null>}
+ */
+export async function addExerciseToTemplate(templateId, exerciseData) {
+  const tpl = await db.templates.get(templateId);
+  if (!tpl) return null;
+
+  tpl.exercises = tpl.exercises || [];
+  const newOrder = tpl.exercises.length + 1;
+  const exId = `tpl-ex-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+
+  const targetSets = parseInt(exerciseData.targetSets) || 3;
+  const targetScheme = exerciseData.targetScheme || `${targetSets}×8–12`;
+  const targetWeight = exerciseData.targetWeight !== undefined && exerciseData.targetWeight !== '' && exerciseData.targetWeight !== null
+    ? parseFloat(exerciseData.targetWeight)
+    : null;
+
+  const newEx = {
+    id: exId,
+    name: exerciseData.name.trim(),
+    order: newOrder,
+    targetSets: targetSets,
+    minReps: exerciseData.minReps || 8,
+    maxReps: exerciseData.maxReps || 12,
+    targetScheme: targetScheme,
+    targetWeight: targetWeight,
+    targetWeightUnit: 'kg',
+    target: targetWeight !== null ? `${targetWeight} kg` : targetScheme,
+    category: exerciseData.category || 'Other'
+  };
+
+  tpl.exercises.push(newEx);
+  tpl.updatedAt = Date.now();
+  await db.templates.put(tpl);
+  return tpl;
+}
+
+/**
+ * Removes an exercise from an existing template.
+ * @param {string} templateId 
+ * @param {string} exerciseId 
+ * @returns {Promise<Object|null>}
+ */
+export async function removeExerciseFromTemplate(templateId, exerciseId) {
+  const tpl = await db.templates.get(templateId);
+  if (!tpl || !tpl.exercises) return null;
+
+  tpl.exercises = tpl.exercises.filter(e => e.id !== exerciseId);
+  // Re-index order
+  tpl.exercises.forEach((e, idx) => { e.order = idx + 1; });
+  tpl.updatedAt = Date.now();
   await db.templates.put(tpl);
   return tpl;
 }

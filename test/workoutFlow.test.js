@@ -4,7 +4,8 @@ import { db, initDatabase } from '../src/db/database.js';
 import {
   getTemplates,
   getTemplate,
-  getDefaultTemplate
+  getDefaultTemplate,
+  addExerciseToTemplate
 } from '../src/repositories/templateRepository.js';
 import {
   getActiveSession,
@@ -37,11 +38,25 @@ async function runTests() {
 
   const upperBodyTpl = await getTemplate('tpl-upper-body');
   assert.strictEqual(upperBodyTpl.name, 'Upper Body');
-  assert.strictEqual(upperBodyTpl.exercises.length, 8, 'Upper Body should have exactly 8 exercises');
-  assert.strictEqual(upperBodyTpl.exercises[0].name, 'Incline Bench Press');
-  assert.strictEqual(upperBodyTpl.exercises[0].targetSets, 3);
-  assert.strictEqual(upperBodyTpl.exercises[0].targetWeight, 35);
-  console.log('  ✓ Upper Body template verified (8 exercises, Incline Bench target 35 kg)');
+  assert.strictEqual(upperBodyTpl.exercises.length, 0, 'Clean Upper Body template should start with 0 exercises');
+  console.log('  ✓ Upper Body template verified (starts clean with 0 exercises)');
+
+  // Test adding an exercise to the clean template
+  console.log('  Adding Incline Bench Press to Upper Body routine...');
+  await addExerciseToTemplate('tpl-upper-body', {
+    name: 'Incline Bench Press',
+    targetSets: 3,
+    targetWeight: 35,
+    minReps: 6,
+    maxReps: 10,
+    category: 'Chest'
+  });
+  const updatedTpl = await getTemplate('tpl-upper-body');
+  assert.strictEqual(updatedTpl.exercises.length, 1, 'Upper Body now has 1 exercise');
+  assert.strictEqual(updatedTpl.exercises[0].name, 'Incline Bench Press');
+  assert.strictEqual(updatedTpl.exercises[0].targetSets, 3);
+  assert.strictEqual(updatedTpl.exercises[0].targetWeight, 35);
+  console.log('  ✓ addExerciseToTemplate verified (1 exercise added with target 35 kg)');
 
   const initialHistory = await getWorkoutHistory();
   assert.strictEqual(initialHistory.length, 0, 'Clean database should start with 0 historical workouts');
@@ -55,14 +70,14 @@ async function runTests() {
   console.log('  ✓ Verified: Gracefully returns null when no prior performance exists');
 
   // Test 3: Create Fresh Session from Template
-  console.log('Test 3: Creating fresh session from Upper Body template on clean slate...');
-  const freshSession = createSessionFromTemplate(upperBodyTpl, initialHistory, { bodyWeight: 73.0 });
+  console.log('Test 3: Creating fresh session from Upper Body template...');
+  const freshSession = createSessionFromTemplate(updatedTpl, initialHistory, { bodyWeight: 73.0 });
   
   assert.ok(freshSession.id, 'Fresh session should have unique ID');
   assert.strictEqual(freshSession.status, 'in_progress');
   assert.strictEqual(freshSession.name, 'Upper Body');
   assert.strictEqual(freshSession.bodyWeight, 73.0);
-  assert.strictEqual(freshSession.exercises.length, 8);
+  assert.strictEqual(freshSession.exercises.length, 1);
 
   // Check that all sets start incomplete
   for (const ex of freshSession.exercises) {
@@ -134,7 +149,7 @@ async function runTests() {
   // Verify the completed workout in database contains all sets
   const fetchedWorkout = await getWorkout(savedCompleted.id);
   assert.ok(fetchedWorkout, 'Should fetch saved workout from IndexedDB');
-  assert.strictEqual(fetchedWorkout.exercises.length, 8);
+  assert.strictEqual(fetchedWorkout.exercises.length, 1);
   assert.strictEqual(fetchedWorkout.exercises[0].sets[0].weight, 37.5);
   assert.strictEqual(fetchedWorkout.exercises[0].sets[0].completed, true);
   console.log('  ✓ Verified: Saved workout contains all exercises and sets in IndexedDB');

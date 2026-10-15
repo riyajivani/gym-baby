@@ -72,10 +72,15 @@
               </svg>
               <span>WORKOUT ROUTINE</span>
             </div>
-            <select id="homeTemplateSelect" class="template-picker-select" aria-label="Select Workout Routine Template">
-              <option value="tpl-upper-body">Upper Body</option>
-              <option value="tpl-push-day">Push Day</option>
-            </select>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <select id="homeTemplateSelect" class="template-picker-select" aria-label="Select Workout Routine Template">
+                <option value="tpl-upper-body">Upper Body</option>
+                <option value="tpl-push-day">Push Day</option>
+                <option value="tpl-pull-day">Pull Day</option>
+                <option value="tpl-leg-day">Leg Day</option>
+              </select>
+              <button class="btn btn-sm btn-subtle" id="btnManageRoutinesHome" title="Manage Routines & Exercises" style="padding: 4px 8px; font-size: 0.75rem; white-space: nowrap;">⚙ Edit</button>
+            </div>
           </div>
 
           <!-- In-progress indicator badge (hidden if no session active) -->
@@ -180,88 +185,109 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- TAB 2: WORKOUT SCREEN (MOST IMPORTANT)      -->
+      <!-- TAB 2: WORKOUT SCREEN                      -->
       <!-- ========================================== -->
       <section id="tab-workout" class="tab-pane">
 
-        <!-- Workout Header Bar -->
-        <div class="workout-header-bar">
-          <div>
-            <div class="workout-session-label">ACTIVE SESSION</div>
-            <h2 class="workout-session-name" id="sessionTitleDisplay">Upper Body Session</h2>
-          </div>
-          <div class="workout-top-actions">
-            <div class="bw-quick-chip" id="workoutWeightChip" title="Tap to update Body Weight">
-              <span class="chip-lbl">BW</span>
-              <span class="chip-val" id="workoutWeightChipVal">-- kg</span>
+        <!-- ACTIVE VIEW (Visible ONLY when a workout is in progress) -->
+        <div id="workoutActiveView" style="display: none;">
+          <!-- Workout Header Bar -->
+          <div class="workout-header-bar">
+            <div>
+              <div class="workout-session-label">ACTIVE SESSION</div>
+              <h2 class="workout-session-name" id="sessionTitleDisplay">Workout Session</h2>
             </div>
-            <button class="btn btn-sm btn-outline-subtle" id="btnWorkoutFinishTop" title="Finish Workout">Finish</button>
-            <button class="btn btn-sm btn-outline-subtle" id="btnWorkoutDiscardTop" title="Cancel/Discard Workout" style="color:#dc2626;">Discard</button>
-          </div>
-        </div>
-
-        <!-- Stepper Progress Header -->
-        <div class="stepper-progress-box">
-          <div class="stepper-meta-row">
-            <span class="stepper-step-lbl" id="exerciseStepLabel">Exercise 1 of 8</span>
-            <span class="stepper-percent-lbl" id="exerciseStepPercent">12% Completed</span>
-          </div>
-          <div class="stepper-progress-track">
-            <div class="stepper-progress-bar" id="exerciseProgressBar" style="width: 12.5%;"></div>
-          </div>
-
-          <!-- Exercise Horizontal Pill Strip (Swipe / Tap to Jump) -->
-          <div class="exercise-pill-strip" id="exercisePillStrip">
-            <!-- Dynamically populated with exercise chips -->
-          </div>
-        </div>
-
-        <!-- Active Exercise Card -->
-        <div class="active-exercise-container" id="activeExerciseContainer">
-          <!-- Dynamically populated for currentExerciseIndex -->
-        </div>
-
-        <!-- Optional Cardio Section (Displayed when on final step or cardio logged) -->
-        <div class="card cardio-compact-card" id="cardioSectionCard">
-          <div class="compact-card-header">
-            <div class="card-title-group">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 6v6l4 2"></path>
-              </svg>
-              <h3>Cardio & Finisher</h3>
+            <div class="workout-top-actions">
+              <div class="bw-quick-chip" id="workoutWeightChip" title="Tap to update Body Weight">
+                <span class="chip-lbl">BW</span>
+                <span class="chip-val" id="workoutWeightChipVal">-- kg</span>
+              </div>
+              <button class="btn btn-sm btn-outline-subtle" id="btnWorkoutFinishTop" title="Finish Workout">Finish</button>
+              <button class="btn btn-sm btn-outline-subtle" id="btnWorkoutDiscardTop" title="Cancel/Discard Workout" style="color:#dc2626;">Discard</button>
             </div>
-            <button class="btn btn-sm btn-outline-subtle" id="btnToggleCardioLog">+ Log Cardio</button>
           </div>
-          <div id="cardioDetailsContainer" style="display:none; margin-top:0.75rem;">
-            <!-- Dynamically rendered cardio inputs -->
-          </div>
-        </div>
 
-        <!-- Sticky Bottom Exercise Navigation Bar -->
-        <div class="exercise-nav-dock">
-          <button class="btn btn-primary btn-next-exercise" id="btnNextExercise">
-            <span>NEXT EXERCISE</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </button>
-          <div class="exercise-nav-secondary">
-            <button class="btn btn-subtle btn-prev-exercise" id="btnPrevExercise">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              <span>Previous</span>
-            </button>
-            <button class="btn btn-subtle" id="btnAddExerciseBtn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
+          <!-- Stepper Progress Header -->
+          <div class="stepper-progress-box">
+            <div class="stepper-meta-row">
+              <span class="stepper-step-lbl" id="exerciseStepLabel">Exercise 1 of 1</span>
+              <span class="stepper-percent-lbl" id="exerciseStepPercent">0% Completed</span>
+            </div>
+            <div class="stepper-progress-track">
+              <div class="stepper-progress-bar" id="exerciseProgressBar" style="width: 0%;"></div>
+            </div>
+
+            <!-- Exercise Horizontal Pill Strip (Swipe / Tap to Jump) -->
+            <div class="exercise-pill-strip" id="exercisePillStrip">
+              <!-- Dynamically populated with exercise chips -->
+            </div>
+          </div>
+
+          <!-- Active Exercise Card -->
+          <div class="active-exercise-container" id="activeExerciseContainer">
+            <!-- Dynamically populated for currentExerciseIndex -->
+          </div>
+
+          <!-- Optional Cardio Section (Displayed when on final step or cardio logged) -->
+          <div class="card cardio-compact-card" id="cardioSectionCard">
+            <div class="compact-card-header">
+              <div class="card-title-group">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 6v6l4 2"></path>
+                </svg>
+                <h3>Cardio & Finisher</h3>
+              </div>
+              <button class="btn btn-sm btn-outline-subtle" id="btnToggleCardioLog">+ Log Cardio</button>
+            </div>
+            <div id="cardioDetailsContainer" style="display:none; margin-top:0.75rem;">
+              <!-- Dynamically rendered cardio inputs -->
+            </div>
+          </div>
+
+          <!-- Sticky Bottom Exercise Navigation Bar -->
+          <div class="exercise-nav-dock">
+            <button class="btn btn-primary btn-next-exercise" id="btnNextExercise">
+              <span>NEXT EXERCISE</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
-              <span>Add Exercise</span>
             </button>
+            <div class="exercise-nav-secondary">
+              <button class="btn btn-subtle btn-prev-exercise" id="btnPrevExercise">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Previous</span>
+              </button>
+              <button class="btn btn-subtle" id="btnAddExerciseBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Add Exercise</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMPTY VIEW (Visible when NO workout is running) -->
+        <div id="workoutEmptyView" class="card text-center" style="display: none; padding: 36px 20px; margin-top: 10px;">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--surface-2, rgba(255,255,255,0.06)); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: var(--primary, #d9725b);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 5v14M18 5v14M4 8h4M16 8h4M4 16h4M16 16h4M8 12h8"></path>
+            </svg>
+          </div>
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">No Workout in Progress</h3>
+          <p class="text-muted" style="font-size: 0.9rem; max-width: 320px; margin: 0 auto 20px; line-height: 1.45;">Choose a routine to start logging, or customize your routines and exercises.</p>
+
+          <div style="max-width: 320px; margin: 0 auto 16px; text-align: left;">
+            <label style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 6px;">Select Routine</label>
+            <select id="workoutEmptyRoutineSelect" class="input-mobile" style="width: 100%; margin-bottom: 12px;"></select>
+            <button class="btn btn-hero btn-block" id="btnWorkoutEmptyStart">START WORKOUT</button>
+            <button class="btn btn-outline-subtle btn-block mt-2" id="btnWorkoutEmptyManage">⚙ Manage Routines & Exercises</button>
           </div>
         </div>
 
@@ -387,6 +413,13 @@
         <!-- Routine & Week Preferences -->
         <div class="card settings-card">
           <h3 class="card-heading-mobile">Workout Routine</h3>
+          <div class="settings-row mb-2">
+            <div class="settings-label-group">
+              <span class="settings-title">Manage Routines & Exercises</span>
+              <span class="settings-desc">Customize Upper Body, Push, Pull, Leg Day, or add new routines</span>
+            </div>
+            <button class="btn btn-sm btn-primary" id="btnManageRoutinesSettings" style="white-space: nowrap;">Manage</button>
+          </div>
           <div class="settings-row">
             <div class="settings-label-group">
               <span class="settings-title">Week Starts On</span>
@@ -642,6 +675,155 @@
       <div class="modal-actions-grid mt-3">
         <button class="btn btn-primary" id="btnSaveBodyWeight">Save Weight</button>
         <button class="btn btn-subtle" id="btnCancelBodyWeight">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MANAGE ROUTINES & EXERCISES MODAL -->
+  <div class="modal-overlay" id="manageRoutinesModal">
+    <div class="modal-card" style="max-width: 480px; width: 92%;">
+      <div class="modal-header">
+        <h3>Manage Routines</h3>
+        <button class="modal-close" id="closeManageRoutinesBtn">&times;</button>
+      </div>
+
+      <!-- Routine Selector with Action Icons -->
+      <div class="form-group mt-3 mb-3">
+        <label style="font-size:0.75rem; font-weight:600; text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:6px;">Select Routine</label>
+        <div class="routine-picker-actions-bar">
+          <select id="routineMgrSelect" class="input-mobile routine-mgr-dropdown"></select>
+          <button class="btn-icon-action btn-icon-action-danger" id="btnDeleteRoutine" title="Delete Routine" aria-label="Delete Routine">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+          <button class="btn-icon-action" id="btnRenameRoutine" title="Edit / Rename Routine" aria-label="Edit Routine">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="btn-icon-action btn-icon-action-primary" id="btnNewRoutinePrompt" title="Add New Routine" aria-label="Add New Routine">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Exercises in Selected Routine -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <span style="font-size:0.85rem; font-weight:700; color:var(--text-main);" id="routineExSectionTitle">Routine Exercises</span>
+        <span class="badge badge-subtle" id="routineExCountBadge">0 exercises</span>
+      </div>
+
+      <div id="routineExercisesList" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px; border: 1px solid var(--border-color, rgba(255,255,255,0.08)); border-radius: 8px; padding: 6px; background: var(--surface-2, rgba(255,255,255,0.02));">
+        <!-- Dynamically rendered list of exercises -->
+      </div>
+
+      <div class="modal-actions-grid">
+        <button class="btn btn-primary" id="btnAddExToRoutineOpen">+ Add Exercise</button>
+        <button class="btn btn-subtle" id="btnCloseManageRoutinesBottom">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ADD EXERCISE TO ROUTINE MODAL -->
+  <div class="modal-overlay" id="addExToRoutineModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="addExToRoutineTitle">Add Exercise to Routine</h3>
+        <button class="modal-close" id="closeAddExToRoutineBtn">&times;</button>
+      </div>
+      <div class="form-group mt-2">
+        <label>Exercise Name</label>
+        <input type="text" id="routineExNameInput" class="input-mobile" placeholder="e.g. Incline Bench Press" />
+      </div>
+      <div class="form-group">
+        <label>Target Sets</label>
+        <input type="number" id="routineExSetsInput" class="input-mobile" value="3" min="1" max="10" />
+      </div>
+      <div class="form-group">
+        <label>Target Rep Range</label>
+        <input type="text" id="routineExRepsInput" class="input-mobile" placeholder="e.g. 8–12" value="8–12" />
+      </div>
+      <div class="form-group">
+        <label>Target Weight (optional)</label>
+        <input type="text" id="routineExWeightInput" class="input-mobile" placeholder="e.g. 35 kg" />
+      </div>
+      <div class="form-group">
+        <label>Muscle Category</label>
+        <select id="routineExCategorySelect" class="input-mobile">
+          <option value="Chest">Chest</option>
+          <option value="Back">Back</option>
+          <option value="Shoulders">Shoulders</option>
+          <option value="Arms">Arms</option>
+          <option value="Legs">Legs</option>
+          <option value="Core">Core</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="modal-actions-grid mt-3">
+        <button class="btn btn-primary" id="btnSaveExToRoutine">Save Exercise</button>
+        <button class="btn btn-subtle" id="btnCancelAddExToRoutine">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. CUSTOM APP CONFIRM DIALOG -->
+  <div class="modal-overlay" id="customConfirmModal">
+    <div class="modal-card custom-popup-card">
+      <div class="custom-popup-icon-box" id="confirmPopupIconBox">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h3 class="custom-popup-title" id="confirmPopupTitle">Confirm Action</h3>
+      <p class="custom-popup-message" id="confirmPopupMessage">Are you sure you want to proceed?</p>
+      <div class="modal-actions-grid mt-4">
+        <button class="btn btn-primary" id="btnConfirmPopupOk">Confirm</button>
+        <button class="btn btn-subtle" id="btnConfirmPopupCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. CUSTOM APP PROMPT DIALOG -->
+  <div class="modal-overlay" id="customPromptModal">
+    <div class="modal-card custom-popup-card">
+      <div class="custom-popup-icon-box info">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+      </div>
+      <h3 class="custom-popup-title" id="promptPopupTitle">Routine Name</h3>
+      <p class="custom-popup-message" id="promptPopupMessage">Enter the name below:</p>
+      <div class="form-group mt-3" style="text-align: left;">
+        <input type="text" id="promptPopupInput" class="input-mobile text-base" placeholder="e.g. Pull Day" />
+      </div>
+      <div class="modal-actions-grid mt-3">
+        <button class="btn btn-primary" id="btnPromptPopupOk">Save</button>
+        <button class="btn btn-subtle" id="btnPromptPopupCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. CUSTOM APP ALERT DIALOG -->
+  <div class="modal-overlay" id="customAlertModal">
+    <div class="modal-card custom-popup-card">
+      <div class="custom-popup-icon-box info" id="alertPopupIconBox">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h3 class="custom-popup-title" id="alertPopupTitle">Notice</h3>
+      <p class="custom-popup-message" id="alertPopupMessage">Operation completed.</p>
+      <div class="modal-actions-grid mt-4" style="grid-template-columns: 1fr;">
+        <button class="btn btn-primary btn-block" id="btnAlertPopupOk">OK</button>
       </div>
     </div>
   </div>

@@ -11,7 +11,12 @@ import {
 import {
   getTemplates,
   getTemplate,
-  getDefaultTemplate
+  getDefaultTemplate,
+  createCustomTemplate,
+  addExerciseToTemplate,
+  removeExerciseFromTemplate,
+  renameTemplate,
+  deleteTemplate
 } from './repositories/templateRepository.js';
 import {
   getActiveSession,
@@ -84,6 +89,187 @@ function playBeep() {
   }
 }
 
+/* ----------------------------------------------------
+   CUSTOM APP DIALOGS (NO BROWSER WINDOW.CONFIRM / ALERT)
+---------------------------------------------------- */
+function showCustomConfirm({
+  title = 'Confirm Action',
+  message = 'Are you sure you want to proceed?',
+  okText = 'Confirm',
+  cancelText = 'Cancel',
+  isDangerous = false
+} = {}) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('customConfirmModal');
+    const titleEl = document.getElementById('confirmPopupTitle');
+    const msgEl = document.getElementById('confirmPopupMessage');
+    const okBtn = document.getElementById('btnConfirmPopupOk');
+    const cancelBtn = document.getElementById('btnConfirmPopupCancel');
+    const iconBox = document.getElementById('confirmPopupIconBox');
+
+    if (!modal || !okBtn || !cancelBtn) {
+      resolve(false);
+      return;
+    }
+
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.textContent = message;
+    okBtn.textContent = okText;
+    cancelBtn.textContent = cancelText;
+
+    if (isDangerous) {
+      okBtn.style.background = '#ef4444';
+      okBtn.style.borderColor = '#ef4444';
+      if (iconBox) {
+        iconBox.className = 'custom-popup-icon-box danger';
+        iconBox.style.color = '#ef4444';
+        iconBox.style.background = 'rgba(239, 68, 68, 0.12)';
+      }
+    } else {
+      okBtn.style.background = 'var(--primary)';
+      okBtn.style.borderColor = 'var(--primary)';
+      if (iconBox) {
+        iconBox.className = 'custom-popup-icon-box info';
+        iconBox.style.color = 'var(--primary)';
+        iconBox.style.background = 'rgba(217, 114, 91, 0.12)';
+      }
+    }
+
+    const cleanup = () => {
+      modal.classList.remove('active');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+    };
+
+    const onOk = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    const onCancel = () => {
+      cleanup();
+      resolve(false);
+    };
+
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    modal.classList.add('active');
+  });
+}
+
+function showCustomPrompt({
+  title = 'Routine Name',
+  message = 'Enter the name below:',
+  defaultValue = '',
+  placeholder = '',
+  okText = 'Save',
+  cancelText = 'Cancel'
+} = {}) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('customPromptModal');
+    const titleEl = document.getElementById('promptPopupTitle');
+    const msgEl = document.getElementById('promptPopupMessage');
+    const input = document.getElementById('promptPopupInput');
+    const okBtn = document.getElementById('btnPromptPopupOk');
+    const cancelBtn = document.getElementById('btnPromptPopupCancel');
+
+    if (!modal || !input || !okBtn || !cancelBtn) {
+      resolve(null);
+      return;
+    }
+
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.textContent = message;
+    input.value = defaultValue;
+    input.placeholder = placeholder;
+    okBtn.textContent = okText;
+    cancelBtn.textContent = cancelText;
+
+    const cleanup = () => {
+      modal.classList.remove('active');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      input.removeEventListener('keydown', onKeyDown);
+    };
+
+    const onOk = () => {
+      const val = input.value.trim();
+      cleanup();
+      resolve(val || null);
+    };
+
+    const onCancel = () => {
+      cleanup();
+      resolve(null);
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        onOk();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onCancel();
+      }
+    };
+
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    input.addEventListener('keydown', onKeyDown);
+    modal.classList.add('active');
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 50);
+  });
+}
+
+function showCustomAlert({
+  title = 'Notice',
+  message = '',
+  type = 'info',
+  okText = 'OK'
+} = {}) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('customAlertModal');
+    const titleEl = document.getElementById('alertPopupTitle');
+    const msgEl = document.getElementById('alertPopupMessage');
+    const okBtn = document.getElementById('btnAlertPopupOk');
+    const iconBox = document.getElementById('alertPopupIconBox');
+
+    if (!modal || !okBtn) {
+      resolve();
+      return;
+    }
+
+    if (titleEl) titleEl.textContent = title;
+    if (msgEl) msgEl.textContent = message;
+    okBtn.textContent = okText;
+
+    if (iconBox) {
+      if (type === 'success') {
+        iconBox.className = 'custom-popup-icon-box success';
+        iconBox.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+      } else if (type === 'danger' || type === 'error') {
+        iconBox.className = 'custom-popup-icon-box danger';
+        iconBox.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+      } else {
+        iconBox.className = 'custom-popup-icon-box info';
+        iconBox.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+      }
+    }
+
+    const onOk = () => {
+      modal.classList.remove('active');
+      okBtn.removeEventListener('click', onOk);
+      resolve();
+    };
+
+    okBtn.addEventListener('click', onOk);
+    modal.classList.add('active');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   initNetworkAndPwaStatus();
 
@@ -112,7 +298,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   initRestTimer();
   initModals();
 
-  renderHomeScreen();
+  // Restore saved active tab across page refreshes (default to home)
+  let initialTab = 'home';
+  try {
+    initialTab = localStorage.getItem('yeshu_active_tab') || 'home';
+  } catch (e) {}
+
+  // Initial render of home for baseline data, then switch to saved tab
+  await renderHomeScreen();
+  if (initialTab !== 'home') {
+    switchTab(initialTab);
+  }
 });
 
 /* ----------------------------------------------------
@@ -168,6 +364,10 @@ function initNavigation() {
 }
 
 function switchTab(tabName) {
+  try {
+    localStorage.setItem('yeshu_active_tab', tabName);
+  } catch (e) {}
+
   const navItems = document.querySelectorAll('.bottom-nav .nav-item');
   navItems.forEach(nav => {
     nav.classList.toggle('active', nav.dataset.tab === tabName);
@@ -230,6 +430,13 @@ function initHomeScreen() {
       settings.selectedTemplateId = selectedTemplateId;
       await updateSettings(settings);
       renderHomeScreen();
+    });
+  }
+
+  const btnManageHome = document.getElementById('btnManageRoutinesHome');
+  if (btnManageHome) {
+    btnManageHome.addEventListener('click', () => {
+      openManageRoutinesModal(selectedTemplateId);
     });
   }
 }
@@ -402,16 +609,20 @@ async function handleStartOrResumeWorkout() {
     switchTab('workout');
   } catch (err) {
     console.error('Error starting workout session:', err);
-    alert('Failed to start workout. Please try again.');
+    await showCustomAlert({ title: 'Error', message: 'Failed to start workout. Please try again.', type: 'error' });
   } finally {
     isStartingWorkout = false;
   }
 }
 
 async function handleDiscardActiveWorkout() {
-  if (!confirm('Are you sure you want to discard your unfinished workout session? All logged sets for this session will be lost.')) {
-    return;
-  }
+  const confirmed = await showCustomConfirm({
+    title: 'Discard In-Progress Workout?',
+    message: 'Are you sure you want to discard your unfinished workout session? All logged sets for this session will be lost.',
+    okText: 'Discard Workout',
+    isDangerous: true
+  });
+  if (!confirmed) return;
 
   await clearActiveSession();
   activeSession = null;
@@ -463,7 +674,7 @@ function initWorkoutScreen() {
 
   if (weightChip) weightChip.addEventListener('click', openBodyWeightModal);
 
-  // Cardio toggle button
+    // Cardio toggle button
   const btnToggleCardio = document.getElementById('btnToggleCardioLog');
   if (btnToggleCardio) {
     btnToggleCardio.addEventListener('click', () => {
@@ -476,39 +687,76 @@ function initWorkoutScreen() {
       }
     });
   }
+
+  // Empty view action buttons
+  const btnEmptyStart = document.getElementById('btnWorkoutEmptyStart');
+  if (btnEmptyStart) {
+    btnEmptyStart.addEventListener('click', async () => {
+      const select = document.getElementById('workoutEmptyRoutineSelect');
+      if (select && select.value) {
+        selectedTemplateId = select.value;
+        settings.selectedTemplateId = selectedTemplateId;
+        await updateSettings(settings);
+      }
+      handleStartOrResumeWorkout();
+    });
+  }
+
+  const btnEmptyManage = document.getElementById('btnWorkoutEmptyManage');
+  if (btnEmptyManage) {
+    btnEmptyManage.addEventListener('click', () => {
+      const select = document.getElementById('workoutEmptyRoutineSelect');
+      const curId = select ? select.value : selectedTemplateId;
+      openManageRoutinesModal(curId);
+    });
+  }
 }
 
 async function handleDiscardActiveWorkoutFromHeader() {
-  if (!confirm('Are you sure you want to discard this workout session? Unsaved progress will be lost.')) {
-    return;
-  }
+  const confirmed = await showCustomConfirm({
+    title: 'Discard Workout?',
+    message: 'Are you sure you want to discard this workout session? Unsaved progress will be lost.',
+    okText: 'Discard',
+    isDangerous: true
+  });
+  if (!confirmed) return;
+
   await clearActiveSession();
   activeSession = null;
   currentExerciseIndex = 0;
-  switchTab('home');
+  renderActiveWorkoutScreen();
+  renderHomeScreen();
 }
 
 function renderActiveWorkoutScreen() {
-  // If no active session, show prompt to start one from template
-  if (!activeSession || activeSession.status !== 'in_progress') {
-    const container = document.getElementById('activeExerciseContainer');
-    if (container) {
-      container.innerHTML = `
-        <div class="card text-center" style="padding: 32px 16px;">
-          <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">No Workout in Progress</h3>
-          <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 18px;">Select a routine on the Home screen and tap Start Workout to begin logging.</p>
-          <a href="#" id="btnGoHomeToStart" style="display: inline-block; color: var(--primary, #d9725b); text-decoration: underline; text-underline-offset: 3px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">Go to Home</a>
-        </div>
-      `;
-      document.getElementById('btnGoHomeToStart')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchTab('home');
-      });
+  const activeView = document.getElementById('workoutActiveView');
+  const emptyView = document.getElementById('workoutEmptyView');
+
+  // Check if an unfinished workout session is active
+  const hasActiveSession = Boolean(activeSession && activeSession.status === 'in_progress');
+
+  if (!hasActiveSession) {
+    if (activeView) activeView.style.display = 'none';
+    if (emptyView) emptyView.style.display = 'block';
+
+    // Populate empty view routine select
+    const emptySelect = document.getElementById('workoutEmptyRoutineSelect');
+    if (emptySelect && templates.length > 0) {
+      emptySelect.innerHTML = templates.map(t =>
+        `<option value="${t.id}" ${t.id === selectedTemplateId ? 'selected' : ''}>${t.name} (${(t.exercises || []).length} exercises)</option>`
+      ).join('');
+      emptySelect.onchange = async (e) => {
+        selectedTemplateId = e.target.value;
+        settings.selectedTemplateId = selectedTemplateId;
+        await updateSettings(settings);
+      };
     }
-    const stepLabel = document.getElementById('exerciseStepLabel');
-    if (stepLabel) stepLabel.textContent = 'No workout active';
     return;
   }
+
+  // Active workout is in progress!
+  if (emptyView) emptyView.style.display = 'none';
+  if (activeView) activeView.style.display = 'block';
 
   const titleEl = document.getElementById('sessionTitleDisplay');
   if (titleEl) titleEl.textContent = activeSession.name || 'Workout Session';
@@ -532,6 +780,10 @@ function renderActiveWorkoutScreen() {
     if (stepLabel) stepLabel.textContent = `Exercise ${curStep} of ${totalExercises}`;
     if (stepPercent) stepPercent.textContent = `${pct}% Completed`;
     if (progressBar) progressBar.style.width = `${pct}%`;
+  } else {
+    if (stepLabel) stepLabel.textContent = '0 exercises in session';
+    if (stepPercent) stepPercent.textContent = '0% Completed';
+    if (progressBar) progressBar.style.width = '0%';
   }
 
   // Exercise Horizontal Pill Strip
@@ -543,7 +795,16 @@ function renderActiveWorkoutScreen() {
   // Next Exercise Button Label
   const btnNext = document.getElementById('btnNextExercise');
   if (btnNext) {
-    if (currentExerciseIndex >= totalExercises - 1) {
+    if (totalExercises === 0) {
+      btnNext.classList.remove('btn-finish-mode');
+      btnNext.innerHTML = `
+        <span>+ ADD EXERCISE</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      `;
+    } else if (currentExerciseIndex >= totalExercises - 1) {
       btnNext.classList.add('btn-finish-mode');
       btnNext.innerHTML = `
         <span>FINISH WORKOUT</span>
@@ -566,7 +827,7 @@ function renderActiveWorkoutScreen() {
   // Previous Exercise Button state
   const btnPrev = document.getElementById('btnPrevExercise');
   if (btnPrev) {
-    btnPrev.style.visibility = currentExerciseIndex > 0 ? 'visible' : 'hidden';
+    btnPrev.style.visibility = (totalExercises > 0 && currentExerciseIndex > 0) ? 'visible' : 'hidden';
   }
 
   // Cardio Section
@@ -861,6 +1122,10 @@ function bindCurrentExerciseEvents(ex) {
 async function handleNextExercise() {
   if (!activeSession) return;
   const exercises = activeSession.exercises || [];
+  if (exercises.length === 0) {
+    document.getElementById('addExerciseModal')?.classList.add('active');
+    return;
+  }
   if (currentExerciseIndex < exercises.length - 1) {
     currentExerciseIndex++;
     activeSession.currentExerciseIndex = currentExerciseIndex;
@@ -1082,7 +1347,7 @@ function openWorkoutCompletionModal() {
         switchTab('home');
       } catch (err) {
         console.error('Error completing workout:', err);
-        alert('Could not save workout. Please try again.');
+        await showCustomAlert({ title: 'Error', message: 'Could not save workout. Please try again.', type: 'error' });
       } finally {
         isFinishingWorkout = false;
         btnDone.disabled = false;
@@ -1154,7 +1419,13 @@ async function renderHistoryScreen() {
   document.querySelectorAll('.btn-del-hist').forEach(btn => {
     btn.onclick = async (e) => {
       const id = e.currentTarget.dataset.id;
-      if (confirm('Delete this completed workout from history?')) {
+      const confirmed = await showCustomConfirm({
+        title: 'Delete Completed Workout?',
+        message: 'Are you sure you want to delete this workout from your history? This cannot be undone.',
+        okText: 'Delete Workout',
+        isDangerous: true
+      });
+      if (confirmed) {
         await deleteWorkout(id);
         renderHistoryScreen();
         renderHomeScreen();
@@ -1330,6 +1601,13 @@ function initSettingsScreen() {
     });
   }
 
+  const btnManageSettings = document.getElementById('btnManageRoutinesSettings');
+  if (btnManageSettings) {
+    btnManageSettings.addEventListener('click', () => {
+      openManageRoutinesModal(selectedTemplateId);
+    });
+  }
+
   const btnExport = document.getElementById('btnExportJSON');
   const btnImport = document.getElementById('btnImportJSON');
   const importInput = document.getElementById('importFileInput');
@@ -1394,9 +1672,9 @@ Target: 15 kg
         await createWorkout(newSessionData);
         history = await getWorkoutHistory();
         renderHomeScreen();
-        alert('Workout session successfully imported into history!');
+        await showCustomAlert({ title: 'Import Complete', message: 'Workout session successfully imported into history!', type: 'success' });
       } else {
-        alert('Could not parse workout text. Please check format.');
+        await showCustomAlert({ title: 'Parse Error', message: 'Could not parse workout text. Please check format.', type: 'error' });
       }
     });
   }
@@ -1405,13 +1683,19 @@ Target: 15 kg
   const btnClearAll = document.getElementById('btnClearAllData');
   if (btnClearAll) {
     btnClearAll.addEventListener('click', async () => {
-      if (confirm('Are you sure you want to permanently clear all workout history and active session data? This cannot be undone.')) {
+      const confirmed = await showCustomConfirm({
+        title: 'Clear All Workout Data?',
+        message: 'Are you sure you want to permanently clear all workout history and active session data? This cannot be undone.',
+        okText: 'Clear Everything',
+        isDangerous: true
+      });
+      if (confirmed) {
         await clearAllWorkoutData();
         history = await getWorkoutHistory();
         activeSession = null;
         currentExerciseIndex = 0;
         renderHomeScreen();
-        alert('All workout data has been cleared. You are ready to log fresh workouts!');
+        await showCustomAlert({ title: 'Data Cleared', message: 'All workout data has been cleared. You are ready to log fresh workouts!', type: 'success' });
       }
     });
   }
@@ -1420,13 +1704,19 @@ Target: 15 kg
   const btnReset = document.getElementById('btnResetSampleData');
   if (btnReset) {
     btnReset.addEventListener('click', async () => {
-      if (confirm('Clear existing data and reset to a clean state?')) {
+      const confirmed = await showCustomConfirm({
+        title: 'Reset Application?',
+        message: 'Clear existing data and reset to a clean state?',
+        okText: 'Reset App',
+        isDangerous: true
+      });
+      if (confirmed) {
         await clearAllWorkoutData();
         templates = await getTemplates();
         history = await getWorkoutHistory();
         activeSession = null;
         renderHomeScreen();
-        alert('App has been reset cleanly!');
+        await showCustomAlert({ title: 'Reset Complete', message: 'App has been reset cleanly!', type: 'success' });
       }
     });
   }
@@ -1579,12 +1869,12 @@ function initModals() {
       const category = document.getElementById('newExCategory').value;
 
       if (!name) {
-        alert('Please enter an exercise name.');
+        await showCustomAlert({ title: 'Missing Name', message: 'Please enter an exercise name.', type: 'error' });
         return;
       }
 
       if (!activeSession) {
-        alert('Start a workout session first to add an exercise.');
+        await showCustomAlert({ title: 'No Active Workout', message: 'Start a workout session first to add an exercise to it.', type: 'info' });
         closeAddModal();
         return;
       }
@@ -1648,6 +1938,274 @@ function initModals() {
       closeBwModal();
     });
   }
+
+  // Routine Manager Modal
+  initRoutineManagerModals();
+}
+
+let currentManagingTemplateId = 'tpl-upper-body';
+
+function initRoutineManagerModals() {
+  const manageModal = document.getElementById('manageRoutinesModal');
+  const closeManageBtn = document.getElementById('closeManageRoutinesBtn');
+  const closeManageBottom = document.getElementById('btnCloseManageRoutinesBottom');
+  const routineSelect = document.getElementById('routineMgrSelect');
+  const btnNewRoutine = document.getElementById('btnNewRoutinePrompt');
+  const btnRenameRoutine = document.getElementById('btnRenameRoutine');
+  const btnDeleteRoutine = document.getElementById('btnDeleteRoutine');
+  const btnAddExOpen = document.getElementById('btnAddExToRoutineOpen');
+
+  // Add Exercise to Routine Modal
+  const addExModal = document.getElementById('addExToRoutineModal');
+  const closeAddExToRoutineBtn = document.getElementById('closeAddExToRoutineBtn');
+  const btnCancelAddExToRoutine = document.getElementById('btnCancelAddExToRoutine');
+  const btnSaveExToRoutine = document.getElementById('btnSaveExToRoutine');
+
+  const closeManage = () => {
+    if (manageModal) manageModal.classList.remove('active');
+  };
+  const closeAddEx = () => {
+    if (addExModal) addExModal.classList.remove('active');
+  };
+
+  if (closeManageBtn) closeManageBtn.addEventListener('click', closeManage);
+  if (closeManageBottom) closeManageBottom.addEventListener('click', closeManage);
+  if (closeAddExToRoutineBtn) closeAddExToRoutineBtn.addEventListener('click', closeAddEx);
+  if (btnCancelAddExToRoutine) btnCancelAddExToRoutine.addEventListener('click', closeAddEx);
+
+  // When routine selection changes in Manager
+  if (routineSelect) {
+    routineSelect.addEventListener('change', (e) => {
+      currentManagingTemplateId = e.target.value;
+      renderRoutineExercisesList(currentManagingTemplateId);
+    });
+  }
+
+  // + New Routine button
+  if (btnNewRoutine) {
+    btnNewRoutine.addEventListener('click', async () => {
+      const routineName = await showCustomPrompt({
+        title: 'New Routine',
+        message: 'Enter routine name (e.g. Pull Day, Leg Day, Arms):',
+        placeholder: 'e.g. Pull Day, Leg Day',
+        okText: 'Create Routine'
+      });
+      if (!routineName || !routineName.trim()) return;
+
+      const created = await createCustomTemplate(routineName.trim());
+      templates = await getTemplates();
+      selectedTemplateId = created.id;
+      settings.selectedTemplateId = selectedTemplateId;
+      await updateSettings(settings);
+
+      openManageRoutinesModal(created.id);
+      renderHomeScreen();
+      if (document.getElementById('workoutEmptyView')?.style.display !== 'none') {
+        renderActiveWorkoutScreen();
+      }
+    });
+  }
+
+  // Rename routine button
+  if (btnRenameRoutine) {
+    btnRenameRoutine.addEventListener('click', async () => {
+      const tpl = templates.find(t => t.id === currentManagingTemplateId);
+      if (!tpl) return;
+      const newName = await showCustomPrompt({
+        title: 'Rename Routine',
+        message: 'Enter new name for this routine:',
+        defaultValue: tpl.name,
+        okText: 'Rename'
+      });
+      if (!newName || !newName.trim() || newName.trim() === tpl.name) return;
+
+      await renameTemplate(tpl.id, newName.trim());
+      templates = await getTemplates();
+      openManageRoutinesModal(tpl.id);
+      renderHomeScreen();
+      if (document.getElementById('workoutEmptyView')?.style.display !== 'none') {
+        renderActiveWorkoutScreen();
+      }
+      if (activeSession && activeSession.templateId === tpl.id) {
+        activeSession.name = newName.trim();
+        await saveActiveSession(activeSession);
+        renderActiveWorkoutScreen();
+      }
+    });
+  }
+
+  // Delete routine button
+  if (btnDeleteRoutine) {
+    btnDeleteRoutine.addEventListener('click', async () => {
+      const tpl = templates.find(t => t.id === currentManagingTemplateId);
+      if (!tpl) return;
+      const confirmed = await showCustomConfirm({
+        title: 'Delete Routine?',
+        message: `Are you sure you want to delete routine "${tpl.name}"? This action cannot be undone.`,
+        okText: 'Delete Routine',
+        isDangerous: true
+      });
+      if (!confirmed) return;
+
+      await deleteTemplate(tpl.id);
+      templates = await getTemplates();
+      if (templates.length === 0) {
+        await seedDefaultTemplatesIfEmpty();
+        templates = await getTemplates();
+      }
+      currentManagingTemplateId = templates[0]?.id || 'tpl-upper-body';
+      selectedTemplateId = currentManagingTemplateId;
+      settings.selectedTemplateId = selectedTemplateId;
+      await updateSettings(settings);
+
+      openManageRoutinesModal(currentManagingTemplateId);
+      renderHomeScreen();
+      if (document.getElementById('workoutEmptyView')?.style.display !== 'none') {
+        renderActiveWorkoutScreen();
+      }
+    });
+  }
+
+  // Open Add Exercise Modal
+  if (btnAddExOpen) {
+    btnAddExOpen.addEventListener('click', () => {
+      const tpl = templates.find(t => t.id === currentManagingTemplateId);
+      const title = document.getElementById('addExToRoutineTitle');
+      if (title && tpl) title.textContent = `Add Exercise to ${tpl.name}`;
+
+      // Reset inputs
+      const nameInput = document.getElementById('routineExNameInput');
+      const setsInput = document.getElementById('routineExSetsInput');
+      const repsInput = document.getElementById('routineExRepsInput');
+      const weightInput = document.getElementById('routineExWeightInput');
+
+      if (nameInput) nameInput.value = '';
+      if (setsInput) setsInput.value = '3';
+      if (repsInput) repsInput.value = '8–12';
+      if (weightInput) weightInput.value = '';
+
+      if (addExModal) addExModal.classList.add('active');
+      if (nameInput) nameInput.focus();
+    });
+  }
+
+  // Save Exercise to Routine
+  if (btnSaveExToRoutine) {
+    btnSaveExToRoutine.addEventListener('click', async () => {
+      const name = document.getElementById('routineExNameInput')?.value.trim();
+      const sets = parseInt(document.getElementById('routineExSetsInput')?.value) || 3;
+      const reps = document.getElementById('routineExRepsInput')?.value.trim() || '8–12';
+      const weight = document.getElementById('routineExWeightInput')?.value.trim();
+      const category = document.getElementById('routineExCategorySelect')?.value || 'Other';
+
+      if (!name) {
+        await showCustomAlert({
+          title: 'Exercise Name Required',
+          message: 'Please enter an exercise name.',
+          type: 'error'
+        });
+        return;
+      }
+
+      await addExerciseToTemplate(currentManagingTemplateId, {
+        name,
+        targetSets: sets,
+        targetScheme: `${sets}×${reps}`,
+        targetWeight: weight ? parseFloat(weight) : null,
+        category
+      });
+
+      templates = await getTemplates();
+      closeAddEx();
+      renderRoutineExercisesList(currentManagingTemplateId);
+      renderHomeScreen();
+      if (document.getElementById('workoutEmptyView')?.style.display !== 'none') {
+        renderActiveWorkoutScreen();
+      }
+    });
+  }
+}
+
+function openManageRoutinesModal(templateId) {
+  const modal = document.getElementById('manageRoutinesModal');
+  if (!modal) return;
+
+  currentManagingTemplateId = templateId || selectedTemplateId || templates[0]?.id || 'tpl-upper-body';
+
+  const select = document.getElementById('routineMgrSelect');
+  if (select && templates.length > 0) {
+    select.innerHTML = templates.map(t =>
+      `<option value="${t.id}" ${t.id === currentManagingTemplateId ? 'selected' : ''}>${t.name}</option>`
+    ).join('');
+  }
+
+  renderRoutineExercisesList(currentManagingTemplateId);
+  modal.classList.add('active');
+}
+
+function renderRoutineExercisesList(templateId) {
+  const container = document.getElementById('routineExercisesList');
+  const sectionTitle = document.getElementById('routineExSectionTitle');
+  const badge = document.getElementById('routineExCountBadge');
+  if (!container) return;
+
+  const tpl = templates.find(t => t.id === templateId);
+  if (!tpl) {
+    container.innerHTML = '<p class="text-muted text-xs p-2">Routine not found.</p>';
+    return;
+  }
+
+  if (sectionTitle) sectionTitle.textContent = `Exercises in ${tpl.name}`;
+  const exercises = tpl.exercises || [];
+  if (badge) badge.textContent = `${exercises.length} exercise${exercises.length === 1 ? '' : 's'}`;
+
+  if (exercises.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 0.85rem;">
+        No exercises in <strong>${tpl.name}</strong> yet.<br/>Tap <strong>+ Add Exercise</strong> below to add one!
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = exercises.map((ex, idx) => `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding: 10px 8px; border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.06));">
+      <div>
+        <div style="font-weight:600; font-size:0.9rem; color:var(--text-main);">${idx + 1}. ${ex.name}</div>
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+          ${ex.targetScheme || `${ex.targetSets || 3} sets`} · Target: <strong style="color:var(--primary, #d9725b);">${ex.target || (ex.targetWeight ? `${ex.targetWeight} kg` : 'Bodyweight')}</strong> · <span class="badge badge-subtle" style="font-size:0.7rem; padding:1px 6px;">${ex.category || 'Other'}</span>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-subtle btn-del-routine-ex" data-tpl="${tpl.id}" data-ex="${ex.id}" style="color:#ef4444; padding:6px 10px;" title="Remove Exercise">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      </button>
+    </div>
+  `).join('');
+
+  // Wire up remove exercise buttons
+  container.querySelectorAll('.btn-del-routine-ex').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const tId = e.currentTarget.dataset.tpl;
+      const eId = e.currentTarget.dataset.ex;
+      const tpl = templates.find(t => t.id === tId);
+      const ex = tpl?.exercises?.find(x => x.id === eId);
+      const confirmed = await showCustomConfirm({
+        title: 'Remove Exercise?',
+        message: `Remove "${ex ? ex.name : 'this exercise'}" from ${tpl ? tpl.name : 'this routine'}?`,
+        okText: 'Remove',
+        isDangerous: true
+      });
+      if (!confirmed) return;
+
+      await removeExerciseFromTemplate(tId, eId);
+      templates = await getTemplates();
+      renderRoutineExercisesList(tId);
+      renderHomeScreen();
+      if (document.getElementById('workoutEmptyView')?.style.display !== 'none') {
+        renderActiveWorkoutScreen();
+      }
+    });
+  });
 }
 
 function openBodyWeightModal() {
@@ -1676,7 +2234,11 @@ async function handleExportBackup() {
     URL.revokeObjectURL(url);
   } catch (err) {
     console.error('Export failed:', err);
-    alert('Failed to export backup data.');
+    await showCustomAlert({
+      title: 'Export Failed',
+      message: 'Failed to export backup data.',
+      type: 'error'
+    });
   }
 }
 
@@ -1688,17 +2250,31 @@ async function handleImportBackup(e) {
   reader.onload = async (event) => {
     try {
       const parsed = JSON.parse(event.target.result);
-      if (confirm('Restore this backup into IndexedDB? This will replace current workout history and templates.')) {
+      const confirmed = await showCustomConfirm({
+        title: 'Restore Backup?',
+        message: 'Restore this backup into IndexedDB? This will replace current workout history and templates.',
+        okText: 'Restore Backup',
+        isDangerous: true
+      });
+      if (confirmed) {
         await importBackup(parsed);
         history = await getWorkoutHistory();
         templates = await getTemplates();
         settings = await getSettings();
         activeSession = null;
         renderHomeScreen();
-        alert('Backup successfully imported!');
+        await showCustomAlert({
+          title: 'Import Successful',
+          message: 'Backup successfully imported!',
+          type: 'success'
+        });
       }
     } catch (err) {
-      alert('Error reading JSON file: ' + err.message);
+      await showCustomAlert({
+        title: 'Import Error',
+        message: 'Error reading JSON file: ' + err.message,
+        type: 'error'
+      });
     }
   };
   reader.readAsText(file);
