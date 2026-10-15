@@ -23,6 +23,7 @@ import { initSettingsScreen, renderSettingsScreen } from './ui/settingsView.js';
 // Interactive Overlays & Modals
 import { initRestTimer } from './ui/restTimer.js';
 import { initModals } from './ui/modals.js';
+import { initCustomSelects } from './ui/customSelect.js';
 
 // Register PWA Service Worker for offline gym usage
 registerSW({ immediate: true });
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSettingsScreen();
   initRestTimer();
   initModals();
+  initCustomSelects();
 
   // 6. Restore saved active tab across page refreshes (default to home)
   let initialTab = 'home';

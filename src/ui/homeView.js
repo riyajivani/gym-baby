@@ -113,7 +113,7 @@ export async function renderHomeScreen() {
     const formattedDate = formatShortDate(matchingLastWorkout.date);
     lastEl.textContent = `${matchingLastWorkout.name?.replace(/\s*\([^)]*\)/, '') || 'Workout'} · ${formattedDate}`;
   } else if (lastEl) {
-    lastEl.textContent = 'No workouts yet';
+    lastEl.textContent = 'None yet';
   }
 
   // Last Workout Summary Card

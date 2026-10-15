@@ -137,6 +137,7 @@ export function openWorkoutCompletionModal() {
   const volumeEl = document.getElementById('compVolume');
   const exEl = document.getElementById('compExercises');
   const setsEl = document.getElementById('compSets');
+  const dateInput = document.getElementById('compDateInput');
   const weightInput = document.getElementById('compWeightInput');
   const weightRef = document.getElementById('compWeightRef');
   const cardioVal = document.getElementById('compCardioVal');
@@ -145,6 +146,10 @@ export function openWorkoutCompletionModal() {
   if (volumeEl) volumeEl.textContent = `${totalVol.toLocaleString()} kg`;
   if (exEl) exEl.textContent = `${(appState.activeSession.exercises || []).length}`;
   if (setsEl) setsEl.textContent = `${totalSets}`;
+
+  // Default date to activeSession.date or today's date (YYYY-MM-DD)
+  const defaultDate = appState.activeSession.date || new Date().toISOString().split('T')[0];
+  if (dateInput) dateInput.value = defaultDate;
 
   const currentBw = appState.activeSession.bodyWeight || (appState.history[0]?.bodyWeight) || appState.settings.latestBodyWeight || null;
   if (weightInput) weightInput.value = currentBw || '';
@@ -171,11 +176,13 @@ export function openWorkoutCompletionModal() {
 
       try {
         const customWeight = weightInput && parseFloat(weightInput.value) ? parseFloat(weightInput.value) : (currentBw || null);
+        const customDate = dateInput && dateInput.value ? dateInput.value : defaultDate;
 
         // Finish session, save permanently, clear active session
         await finishSession(appState.activeSession, {
           bodyWeight: customWeight,
-          durationMinutes: elapsedMinutes
+          durationMinutes: elapsedMinutes,
+          date: customDate
         });
 
         // Reset state

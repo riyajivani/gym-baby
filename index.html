@@ -64,7 +64,7 @@
 
         <!-- Today's Workout Hero Card -->
         <div class="today-hero-card">
-          <div class="hero-top-row">
+          <div class="hero-top-tag-row">
             <div class="hero-top-tag">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -72,15 +72,17 @@
               </svg>
               <span>WORKOUT ROUTINE</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <select id="homeTemplateSelect" class="template-picker-select" aria-label="Select Workout Routine Template">
-                <option value="tpl-upper-body">Upper Body</option>
-                <option value="tpl-push-day">Push Day</option>
-                <option value="tpl-pull-day">Pull Day</option>
-                <option value="tpl-leg-day">Leg Day</option>
-              </select>
-              <button class="btn btn-sm btn-subtle" id="btnManageRoutinesHome" title="Manage Routines & Exercises" style="padding: 4px 8px; font-size: 0.75rem; white-space: nowrap;">⚙ Edit</button>
-            </div>
+          </div>
+          
+          <!-- Routine Picker & Edit Action Row (Moved downward to prevent overlap) -->
+          <div class="hero-controls-row">
+            <select id="homeTemplateSelect" class="template-picker-select" aria-label="Select Workout Routine Template">
+              <option value="tpl-upper-body">Upper Body</option>
+              <option value="tpl-push-day">Push Day</option>
+              <option value="tpl-pull-day">Pull Day</option>
+              <option value="tpl-leg-day">Leg Day</option>
+            </select>
+            <button class="btn btn-sm btn-subtle" id="btnManageRoutinesHome" title="Manage Routines & Exercises">⚙ Edit</button>
           </div>
 
           <!-- In-progress indicator badge (hidden if no session active) -->
@@ -99,7 +101,7 @@
             </div>
             <div class="hero-meta-box">
               <span class="meta-label">Last Workout</span>
-              <span class="meta-val" id="homeLastWorkoutDisplay">No workouts yet</span>
+              <span class="meta-val" id="homeLastWorkoutDisplay">None yet</span>
             </div>
           </div>
 
@@ -655,6 +657,17 @@
         </div>
       </div>
 
+      <!-- Workout Date Selection -->
+      <div class="comp-weight-row">
+        <div class="comp-weight-label-group">
+          <span class="comp-weight-label">Workout Date</span>
+          <span class="comp-weight-ref" id="compDateRef">Date of workout</span>
+        </div>
+        <div class="comp-weight-input-box">
+          <input type="date" id="compDateInput" class="comp-date-input" />
+        </div>
+      </div>
+
       <!-- Quick Body Weight Entry / Confirmation -->
       <div class="comp-weight-row">
         <div class="comp-weight-label-group">
@@ -902,6 +915,19 @@
       <p class="custom-popup-message" id="alertPopupMessage">Operation completed.</p>
       <div class="modal-actions-grid mt-4" style="grid-template-columns: 1fr;">
         <button class="btn btn-primary btn-block" id="btnAlertPopupOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. CUSTOM IN-APP DROPDOWN SELECT PICKER (NO NATIVE FULL-SCREEN WHEEL) -->
+  <div class="modal-overlay custom-picker-overlay" id="customSelectPickerModal">
+    <div class="custom-picker-sheet">
+      <div class="custom-picker-header">
+        <h3 class="custom-picker-title" id="customPickerTitle">Select Option</h3>
+        <button class="sheet-close" id="btnCloseCustomPicker" aria-label="Close">&times;</button>
+      </div>
+      <div class="custom-picker-options" id="customPickerOptionsContainer">
+        <!-- Rendered dynamically -->
       </div>
     </div>
   </div>

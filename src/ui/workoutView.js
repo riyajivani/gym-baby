@@ -258,15 +258,6 @@ export function renderCurrentExerciseCard(exercises) {
         </div>
       </div>
     `;
-  } else if (ex.target) {
-    lastWorkoutHtml = `
-      <div class="last-workout-box">
-        <div class="last-workout-title">Target Standard</div>
-        <div class="last-sets-list">
-          <span class="last-set-line">${ex.target}</span>
-        </div>
-      </div>
-    `;
   }
 
   // Today's sets rows
@@ -327,7 +318,7 @@ export function renderCurrentExerciseCard(exercises) {
 
     <button class="btn-add-set-row" id="btnAddSetToCurrentEx">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      <span>+ Add Set</span>
+      <span>Add Set</span>
     </button>
 
     <!-- RIR Section (After final set) -->

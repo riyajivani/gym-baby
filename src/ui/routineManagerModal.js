@@ -231,7 +231,7 @@ export function renderRoutineExercisesList(templateId) {
   if (exercises.length === 0) {
     container.innerHTML = `
       <div style="text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 0.85rem;">
-        No exercises in <strong>${tpl.name}</strong> yet.<br/>Tap <strong>+ Add Exercise</strong> below to add one!
+        No exercises in <strong>${tpl.name}</strong> yet.<br/>Tap <strong>rg Exercise</strong> below to add one!
       </div>
     `;
     return;

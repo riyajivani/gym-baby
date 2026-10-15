@@ -1,18 +1,111 @@
 /**
- * Smart Gym Log Parser - Enhanced Multi-Day & Week 5 Support
+ * Smart Gym Log Parser - Enhanced Multi-Day, Auto-Date Stamping & Clean Routine Naming
  */
+
+/**
+ * Normalizes routine titles to clean names (e.g. "Push Day", "Pull Day", "Legs + Core", "Upper Body", "Arms + Shoulders + Core")
+ * without "Day 1 — ", "Day 2 — " prefixes.
+ */
+export function cleanRoutineName(rawTitle) {
+  if (!rawTitle) return 'Workout Session';
+
+  let cleaned = rawTitle.replace(/^[🟦🟩🟥🟪🟧🟢🟡🟣\s]+/, '');
+  // Remove "DAY X — " or "DAY X - " or "DAY X: "
+  cleaned = cleaned.replace(/^DAY\s*\d+\s*[—\-:]*\s*/i, '').trim();
+
+  const lower = cleaned.toLowerCase();
+  if (lower === 'push') return 'Push Day';
+  if (lower === 'pull') return 'Pull Day';
+  if (lower === 'legs' || lower === 'leg' || lower.includes('legs + core') || lower.includes('legs & core')) return 'Legs + Core';
+  if (lower === 'upper' || lower === 'upper body') return 'Upper Body';
+  if (lower.includes('arms') && lower.includes('shoulders')) return 'Arms + Shoulders + Core';
+
+  return cleaned || 'Workout Session';
+}
+
+/**
+ * Parses start date from text headers like:
+ * "Dates: 2/9/26 to 8/9/26" -> 2026-09-02
+ * "Dates: 25/8/26 to 31/8/26" -> 2026-08-25
+ * "Dates: 25 to ___" -> 2026-08-25
+ */
+export function parseDateRange(text) {
+  if (!text) return null;
+
+  // Match e.g. "Dates: 2/9/26 to 8/9/26" or "Dates: 02/09/2026 - 08/09/2026"
+  const fullRangeMatch = text.match(/Dates\s*[:=\-]\s*(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})\s*(?:to|-)\s*(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/i);
+  if (fullRangeMatch) {
+    let startDay = parseInt(fullRangeMatch[1]);
+    let startMonth = parseInt(fullRangeMatch[2]);
+    let startYear = parseInt(fullRangeMatch[3]);
+    if (startYear < 100) startYear += 2000;
+
+    let endDay = parseInt(fullRangeMatch[4]);
+    let endMonth = parseInt(fullRangeMatch[5]);
+    let endYear = parseInt(fullRangeMatch[6]);
+    if (endYear < 100) endYear += 2000;
+
+    return {
+      startDate: new Date(startYear, startMonth - 1, startDay),
+      endDate: new Date(endYear, endMonth - 1, endDay)
+    };
+  }
+
+  // Match e.g. "Dates: 25/8/26 to 31/8/26" or "Dates: 25 to 31"
+  const partialRangeMatch = text.match(/Dates\s*[:=\-]\s*(\d{1,2})(?:[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?)?\s*(?:to|-)\s*(\d{1,2})?(?:[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?)?/i);
+  if (partialRangeMatch && partialRangeMatch[1]) {
+    let startDay = parseInt(partialRangeMatch[1]);
+    let startMonth = partialRangeMatch[2] ? parseInt(partialRangeMatch[2]) : (startDay >= 20 ? 8 : 9); // default Aug or Sep
+    let startYear = partialRangeMatch[3] ? parseInt(partialRangeMatch[3]) : 2026;
+    if (startYear < 100) startYear += 2000;
+
+    return {
+      startDate: new Date(startYear, startMonth - 1, startDay)
+    };
+  }
+
+  return null;
+}
+
+function formatDateToIso(date) {
+  if (!date || isNaN(date.getTime())) return new Date().toISOString().split('T')[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export function parseGymLog(text) {
   if (!text || typeof text !== 'string') return null;
 
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  
+
+  // Check date range
+  const rangeInfo = parseDateRange(text);
+  const baseStartDate = rangeInfo?.startDate || null;
+
+  // Check weekly average body weight
+  const avgBwMatch = text.match(/Body\s*weight\s*[—\-:]\s*(?:weekly\s*average\s*[:=\-]?)?\s*([\d.]+)\s*kg/i);
+  const defaultWeeklyWeight = avgBwMatch ? parseFloat(avgBwMatch[1]) : null;
+
   const days = [];
   const todayDateStr = new Date().toISOString().split('T')[0];
+
+  const getDayDate = (dayIndex) => {
+    if (!baseStartDate) return todayDateStr;
+    // Standard workout distribution across week: Day 1 (+0), Day 2 (+1), Day 3 (+2), Day 4 (+4), Day 5 (+5)
+    const dayOffsets = [0, 1, 2, 4, 5, 6];
+    const offset = dayOffsets[dayIndex] !== undefined ? dayOffsets[dayIndex] : dayIndex;
+    const d = new Date(baseStartDate.getTime() + offset * 24 * 60 * 60 * 1000);
+    return formatDateToIso(d);
+  };
+
+  let dayCounter = 0;
   let currentDay = {
     title: 'Workout Session',
-    date: todayDateStr,
-    bodyWeight: null,
+    routineName: 'Push Day',
+    date: getDayDate(0),
+    bodyWeight: defaultWeeklyWeight,
     exercises: [],
     cardio: []
   };
@@ -31,12 +124,22 @@ export function parseGymLog(text) {
         currentExercise = null;
       }
       if (currentDay.exercises.length > 0 || currentDay.cardio.length > 0) {
+        // Fallback for bodyweight if invalid or missing
+        if (!currentDay.bodyWeight && defaultWeeklyWeight) {
+          currentDay.bodyWeight = defaultWeeklyWeight;
+        }
         days.push(currentDay);
+        dayCounter++;
       }
+
+      const rawTitle = dayHeaderMatch[1].trim();
+      const cleanTitle = cleanRoutineName(rawTitle);
+
       currentDay = {
-        title: dayHeaderMatch[1].trim(),
-        date: todayDateStr,
-        bodyWeight: null,
+        title: cleanTitle,
+        routineName: cleanTitle,
+        date: getDayDate(dayCounter),
+        bodyWeight: defaultWeeklyWeight,
         exercises: [],
         cardio: []
       };
@@ -105,7 +208,7 @@ export function parseGymLog(text) {
     }
 
     // Check Set Line: e.g. "• Set 1: 40 kg × 8" or "• Set 1: bar+2.5kg/side × 12" or "• Set 1: 15"
-    const setMatch = line.match(/•?\s*Set\s*(\d+)\s*[:=\-]\s*(.+?)(?:\s*[×x*]\s*([\d._\-]+|\d+\s*reps)?)?$/i);
+    const setMatch = line.match(/•?\s*Set\s*(\d+)\s*[:=\-]\s*(.+?)(?:\s*[×x*]\s*([\d._\-]+|\d+\s*reps|\d+\/per side reps)?)?$/i);
     if (setMatch && currentExercise) {
       const setNum = parseInt(setMatch[1]);
       const rawWeight = setMatch[2].trim();
@@ -114,12 +217,11 @@ export function parseGymLog(text) {
       let weightNum = parseFloat(rawWeight.match(/[\d.]+/)?.[0] || '0');
       let repsNum = parseInt(rawReps.match(/\d+/)?.[0] || rawWeight.match(/\d+/)?.[0] || '0');
 
-      if (rawWeight.includes('bar+2.5')) {
+      if (rawWeight.includes('ez bar') || rawWeight.includes('bar+2.5')) {
         weightNum = 15;
       }
 
       if (!rawReps && !rawWeight.includes('kg') && !rawWeight.includes('bar')) {
-        // Line format like "• Set 1: 15" where 15 is reps and weight is bodyweight
         repsNum = parseInt(rawWeight) || 0;
         weightNum = 0;
       }
@@ -157,7 +259,7 @@ export function parseGymLog(text) {
       const name = exHeaderMatch[1].replace(/^[•\-\s]+/, '').trim();
       const scheme = exHeaderMatch[2] ? exHeaderMatch[2].replace(/\s+/g, '') : '';
 
-      if (name.toLowerCase().startsWith('target:') || name.toLowerCase().startsWith('weight:')) {
+      if (name.toLowerCase().startsWith('target:') || name.toLowerCase().startsWith('weight:') || name.toLowerCase().startsWith('dates:')) {
         continue;
       }
 
@@ -168,7 +270,7 @@ export function parseGymLog(text) {
 
       currentExercise = {
         name: name,
-        targetScheme: scheme || '3x8-12',
+        targetScheme: scheme || '3×8–12',
         target: '',
         category: autoDetectCategory(name),
         sets: [],
@@ -181,6 +283,9 @@ export function parseGymLog(text) {
     currentDay.exercises.push(currentExercise);
   }
   if (currentDay.exercises.length > 0 || currentDay.cardio.length > 0) {
+    if (!currentDay.bodyWeight && defaultWeeklyWeight) {
+      currentDay.bodyWeight = defaultWeeklyWeight;
+    }
     days.push(currentDay);
   }
 

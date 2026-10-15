@@ -241,8 +241,11 @@ export async function finishSession(session, completionData = {}) {
     ? completionData.bodyWeight
     : (session.bodyWeight || null);
 
+  const finalDate = completionData.date || session.date || new Date().toISOString().split('T')[0];
+
   const completedSession = {
     ...session,
+    date: finalDate,
     status: 'completed',
     completedAt: now,
     durationMinutes: finalDuration,
