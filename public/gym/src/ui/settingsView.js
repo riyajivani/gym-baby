@@ -131,6 +131,9 @@ export function initSettingsScreen() {
         await reloadTemplates();
         renderHomeScreen();
 
+        textarea.value = '';
+        updateParsePreview('');
+
         await showCustomAlert({
           title: 'Import & Routine Setup Complete!',
           message: `Successfully imported ${importedCount} workouts into History with their exact dates, and automatically set up your Routines (Push Day, Pull Day, Legs + Core, Upper Body, Arms + Shoulders + Core)!`,
