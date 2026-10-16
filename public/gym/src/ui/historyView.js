@@ -263,7 +263,6 @@ export async function renderHistoryScreen() {
         <div class="hist-chips-row">
           <span class="hist-chip">${exercises.length} Exercise${exercises.length === 1 ? '' : 's'}</span>
           <span class="hist-chip">${completedSetsCount} Set${completedSetsCount === 1 ? '' : 's'}</span>
-          <span class="hist-chip chip-highlight">${vol.toLocaleString()} kg</span>
           ${hist.bodyWeight ? `<span class="hist-chip">${hist.bodyWeight} kg BW</span>` : ''}
           ${hasCardio ? `<span class="hist-chip chip-cardio">Cardio</span>` : ''}
         </div>
