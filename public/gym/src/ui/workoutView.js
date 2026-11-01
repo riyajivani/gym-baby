@@ -33,7 +33,7 @@ export function initWorkoutScreen() {
     });
   }
 
-  if (btnFinishTop) btnFinishTop.addEventListener('click', openWorkoutCompletionModal);
+  if (btnFinishTop) btnFinishTop.addEventListener('click', handleFinishWorkout);
   if (btnDiscardTop) btnDiscardTop.addEventListener('click', handleDiscardActiveWorkoutFromHeader);
 
   if (btnAddEx) {
@@ -92,6 +92,39 @@ export async function handleDiscardActiveWorkoutFromHeader() {
   await clearActiveSessionState();
   renderActiveWorkoutScreen();
   renderHomeScreen();
+}
+
+export async function handleFinishWorkout() {
+  if (!appState.activeSession) return;
+
+  const exercises = appState.activeSession.exercises || [];
+  let totalSets = 0;
+  let completedSets = 0;
+
+  exercises.forEach(ex => {
+    (ex.sets || []).forEach(s => {
+      totalSets++;
+      if (s.completed) completedSets++;
+    });
+  });
+
+  let message = 'Are you sure you want to finish this workout session?';
+  if (totalSets > 0 && completedSets < totalSets) {
+    const remaining = totalSets - completedSets;
+    message = `You have completed ${completedSets} of ${totalSets} sets (${remaining} uncompleted). Are you sure you want to finish this workout?`;
+  }
+
+  const confirmed = await showCustomConfirm({
+    title: 'Finish Workout?',
+    message,
+    okText: 'Finish Workout',
+    cancelText: 'Keep Logging',
+    isDangerous: false
+  });
+
+  if (!confirmed) return;
+
+  openWorkoutCompletionModal();
 }
 
 export function renderActiveWorkoutScreen() {
@@ -488,7 +521,7 @@ export async function handleNextExercise() {
     if (mainContent) mainContent.scrollTop = 0;
   } else {
     // Reached end of exercises -> open completion summary modal
-    openWorkoutCompletionModal();
+    await handleFinishWorkout();
   }
 }
 

@@ -13,6 +13,17 @@ import { renderActiveWorkoutScreen } from './workoutView.js';
 import { initRoutineManagerModals } from './routineManagerModal.js';
 
 export function initModals() {
+  // Workout Completion Modal close / cancel
+  const compModal = document.getElementById('workoutCompleteModal');
+  const closeCompBtn = document.getElementById('closeWorkoutCompleteBtn');
+  const btnCancelComp = document.getElementById('btnCancelCompleteModal');
+
+  const closeCompModal = () => {
+    if (compModal) compModal.classList.remove('active');
+  };
+
+  if (closeCompBtn) closeCompBtn.addEventListener('click', closeCompModal);
+  if (btnCancelComp) btnCancelComp.addEventListener('click', closeCompModal);
   // Add Exercise to Active Workout Modal
   const addModal = document.getElementById('addExerciseModal');
   const closeAddExBtn = document.getElementById('closeAddExBtn');

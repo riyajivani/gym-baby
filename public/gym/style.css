@@ -1620,6 +1620,7 @@ html, body {
 
 /* 1. WORKOUT COMPLETION CARD */
 .completion-card {
+  position: relative;
   width: 100%;
   max-width: 380px;
   background: var(--bg-surface);
@@ -1627,6 +1628,12 @@ html, body {
   padding: 22px 18px;
   box-shadow: var(--shadow-lg);
   text-align: center;
+}
+
+.completion-card .modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
 }
 
 .completion-icon-box {

@@ -637,6 +637,7 @@
   <!-- 1. WORKOUT COMPLETION SUMMARY MODAL -->
   <div class="modal-overlay" id="workoutCompleteModal">
     <div class="completion-card">
+      <button class="modal-close" id="closeWorkoutCompleteBtn" aria-label="Close" title="Back to Workout">&times;</button>
       <div class="completion-icon-box">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
@@ -694,9 +695,14 @@
         <span class="comp-cardio-val" id="compCardioVal">No cardio logged</span>
       </div>
 
-      <button class="btn btn-hero mt-3" id="btnCompleteDone">
-        <span>DONE</span>
-      </button>
+      <div class="modal-actions-grid mt-3">
+        <button class="btn btn-primary" id="btnCompleteDone">
+          <span>Save & Finish</span>
+        </button>
+        <button class="btn btn-subtle" id="btnCancelCompleteModal">
+          <span>Keep Logging</span>
+        </button>
+      </div>
     </div>
   </div>
 

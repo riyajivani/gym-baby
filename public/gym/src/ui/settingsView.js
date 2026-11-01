@@ -77,7 +77,17 @@ export function initSettingsScreen() {
   }
 
   if (btnClear && textarea) {
-    btnClear.addEventListener('click', () => {
+    btnClear.addEventListener('click', async () => {
+      if (textarea.value.trim().length > 0) {
+        const confirmed = await showCustomConfirm({
+          title: 'Clear Notes?',
+          message: 'Are you sure you want to clear your notes? Any unsaved text will be lost.',
+          okText: 'Clear Notes',
+          cancelText: 'Cancel',
+          isDangerous: true
+        });
+        if (!confirmed) return;
+      }
       textarea.value = '';
       updateParsePreview('');
     });
@@ -87,6 +97,14 @@ export function initSettingsScreen() {
     btnParse.addEventListener('click', async () => {
       const parsed = parseGymLog(textarea.value);
       if (parsed && parsed.days && parsed.days.length > 0) {
+        const count = parsed.days.length;
+        const confirmed = await showCustomConfirm({
+          title: 'Import Workouts?',
+          message: `Are you sure you want to import ${count} workout session${count === 1 ? '' : 's'} into your history and update your routines?`,
+          okText: 'Import Workouts',
+          cancelText: 'Cancel'
+        });
+        if (!confirmed) return;
         let importedCount = 0;
         let lastBw = null;
 
